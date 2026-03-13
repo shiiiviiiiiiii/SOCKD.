@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOCKD. | PROFILE</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .profile-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            min-height: 80vh;
+            border-bottom: var(--border-thick);
+        }
+
+        .profile-sidebar {
+            background: var(--light-gray);
+            border-right: var(--border-thick);
+            padding: 2rem;
+        }
+
+        .user-card {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: var(--border-thick);
+            margin: 0 auto 1rem;
+            background: var(--neon-yellow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-family: var(--font-heading);
+            box-shadow: 4px 4px 0px var(--black);
+        }
+
+        .profile-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: var(--white);
+            border: var(--border-thick);
+            padding: 1rem;
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 4px 4px 0px var(--black);
+        }
+
+        .nav-btn.active, .nav-btn:hover {
+            background: var(--black);
+            color: var(--neon-green);
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--neon-green);
+        }
+
+        .profile-content {
+            padding: 4rem;
+            background: var(--white);
+        }
+
+        .tab-section {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-section.active {
+            display: block;
+        }
+
+        /* Order Cards */
+        .order-card {
+            border: var(--border-thick);
+            margin-bottom: 2rem;
+            background: var(--white);
+            box-shadow: var(--shadow-hard);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            background: var(--light-gray);
+            border-bottom: var(--border-thick);
+            font-family: var(--font-heading);
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border: var(--border-thick);
+            font-size: 0.9rem;
+            box-shadow: 2px 2px 0px var(--black);
+        }
+
+        .status-badge.delivered { background: var(--neon-green); }
+        .status-badge.processing { background: var(--neon-yellow); }
+        .status-badge.cancelled { background: var(--hot-pink); color: var(--white); box-shadow: 2px 2px 0px var(--white); }
+
+        .order-body {
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Addresses */
+        .address-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .address-card {
+            border: var(--border-thick);
+            padding: 2rem;
+            background: var(--light-gray);
+            position: relative;
+        }
+
+        .address-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        /* Auth Container */
+        .auth-container {
+            max-width: 500px;
+            margin: 6rem auto;
+            border: var(--border-thick);
+            background: var(--white);
+            box-shadow: 12px 12px 0px var(--cyan);
+            padding: 3rem;
+        }
+
+        .auth-toggle {
+            display: flex;
+            border-bottom: var(--border-thick);
+            margin-bottom: 2rem;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            cursor: pointer;
+            background: var(--light-gray);
+            border: none;
+        }
+
+        .auth-tab.active {
+            background: var(--white);
+            border: var(--border-thick);
+            border-bottom: none;
+            margin-bottom: -3px;
+            color: var(--black);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 900px) {
+            .profile-layout {
+                grid-template-columns: 1fr;
+            }
+            .profile-sidebar {
+                border-right: none;
+                border-bottom: var(--border-thick);
+            }
+            .order-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .order-body {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+            .address-grid {
+                grid-template-columns: 1fr;
+            }
+            .profile-content {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="global-header"></div>
+
+    <!-- Login/Signup View (Shown if not logged in) -->
+    <div id="auth-view" style="display: none; min-height: 80vh; background: var(--neon-yellow); padding: 2rem;">
+        <div class="auth-container">
+            <div class="auth-toggle">
+                <button class="auth-tab active" onclick="switchAuth('login')">LOGIN</button>
+                <button class="auth-tab" onclick="switchAuth('signup')">SIGN UP</button>
+            </div>
+            
+            <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label class="form-label">EMAIL</label>
+                    <input type="email" class="brutal-input" placeholder="YOU@EXAMPLE.COM" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label class="form-label">PASSWORD</label>
+                    <input type="password" class="brutal-input" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="brutal-btn primary" style="width: 100%; box-shadow: 4px 4px 0px var(--black);">ENTER THE CULT</button>
+            </form>
+
+            <form id="signup-form" class="auth-form" onsubmit="handleLogin(event)">
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label class="form-label">FULL NAME</label>
+                    <input type="text" class="brutal-input" placeholder="JOHN DOE" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 1.5rem;">
+                    <label class="form-label">EMAIL</label>
+                    <input type="email" class="brutal-input" placeholder="YOU@EXAMPLE.COM" required>
+                </div>
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label class="form-label">PASSWORD</label>
+                    <input type="password" class="brutal-input" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="brutal-btn primary" style="width: 100%; box-shadow: 4px 4px 0px var(--black);">CREATE ACCOUNT</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Dashboard View -->
+    <div class="profile-layout" id="profile-view" style="display: none;">
+        <aside class="profile-sidebar">
+            <div class="user-card">
+                <div class="avatar">JD</div>
+                <h2 style="font-size: 2rem; margin-bottom: 0.5rem;">JOHN DOE</h2>
+                <p style="color: #666;">john@example.com</p>
+                <button class="brutal-btn" style="margin-top: 1.5rem; padding: 0.5rem 1rem; width: 100%;" onclick="handleLogout()">LOGOUT</button>
+            </div>
+            
+            <nav class="profile-nav">
+                <button class="nav-btn active" data-target="orders">MY ORDERS</button>
+                <button class="nav-btn" data-target="wishlist">WISHLIST</button>
+                <button class="nav-btn" data-target="addresses">ADDRESSES</button>
+                <button class="nav-btn" data-target="settings">SETTINGS</button>
+            </nav>
+        </aside>
+
+        <main class="profile-content">
+            <!-- Orders Tab -->
+            <section class="tab-section active" id="orders">
+                <h1 style="font-size: 3rem; margin-bottom: 3rem;">ORDER HISTORY</h1>
+                
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <span style="display: block; font-size: 0.9rem; color: #666;">ORDER #SKD84920</span>
+                            <span style="font-size: 1.5rem;">24 OCT 2026</span>
+                        </div>
+                        <div class="status-badge delivered">DELIVERED</div>
+                    </div>
+                    <div class="order-body">
+                        <div>
+                            <p style="font-weight: 600; margin-bottom: 0.5rem;">3 ITEMS</p>
+                            <p style="color: #666; font-size: 0.9rem;">Classic Neon Mid-Calf, Black No-Show, Cyan Speed Laces</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 1.5rem; font-family: var(--font-heading); margin-bottom: 0.5rem;">₹1047</p>
+                            <button class="brutal-btn" style="padding: 0.5rem 1rem; background: var(--light-gray);">VIEW DETAILS</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <span style="display: block; font-size: 0.9rem; color: #666;">ORDER #SKD62199</span>
+                            <span style="font-size: 1.5rem;">03 SEP 2026</span>
+                        </div>
+                        <div class="status-badge processing">PROCESSING</div>
+                    </div>
+                    <div class="order-body">
+                        <div>
+                            <p style="font-weight: 600; margin-bottom: 0.5rem;">1 ITEM</p>
+                            <p style="color: #666; font-size: 0.9rem;">Brutal Sneaker Bag</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 1.5rem; font-family: var(--font-heading); margin-bottom: 0.5rem;">₹1299</p>
+                            <button class="brutal-btn" style="padding: 0.5rem 1rem; background: var(--light-gray);">VIEW DETAILS</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <span style="display: block; font-size: 0.9rem; color: #666;">ORDER #SKD10024</span>
+                            <span style="font-size: 1.5rem;">12 JAN 2026</span>
+                        </div>
+                        <div class="status-badge cancelled">CANCELLED</div>
+                    </div>
+                    <div class="order-body">
+                        <div>
+                            <p style="font-weight: 600; margin-bottom: 0.5rem;">2 ITEMS</p>
+                            <p style="color: #666; font-size: 0.9rem;">Hot Pink Ankle Breakers x 2</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="font-size: 1.5rem; font-family: var(--font-heading); margin-bottom: 0.5rem; text-decoration: line-through;">₹698</p>
+                            <button class="brutal-btn" style="padding: 0.5rem 1rem; background: var(--light-gray);" disabled>N/A</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Wishlist Tab -->
+            <section class="tab-section" id="wishlist">
+                <h1 style="font-size: 3rem; margin-bottom: 3rem;">WISHLIST</h1>
+                <div class="grid-3" id="wishlist-grid">
+                    <!-- Hardcoded for demo -->
+                    <div class="brutal-card">
+                        <div class="brutal-card-img" style="background-color: var(--neon-yellow);">
+                            <img src="https://placehold.co/600x600/F5FF00/000000?text=HIGH+TOPS" alt="Electric Yellow High-Tops">
+                        </div>
+                        <div class="brutal-card-body">
+                            <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;">Electric Yellow High-Tops</h3>
+                            <span class="price">₹449</span>
+                            <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                                <button class="brutal-btn primary" style="flex: 2; padding: 0.5rem;">MOVE TO CART</button>
+                                <button class="brutal-btn" style="flex: 1; padding: 0.5rem;">✕</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Addresses Tab -->
+            <section class="tab-section" id="addresses">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+                    <h1 style="font-size: 3rem;">SAVED ADDRESSES</h1>
+                    <button class="brutal-btn primary" onclick="document.getElementById('add-addr-form').style.display = 'block';">ADD NEW</button>
+                </div>
+
+                <div id="add-addr-form" style="display: none; border: var(--border-thick); padding: 2rem; background: var(--neon-green); margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 1.5rem;">NEW ADDRESS</h3>
+                    <div class="form-row">
+                        <div class="form-group" style="margin-bottom: 1rem;"><input type="text" class="brutal-input" placeholder="LABEL (e.g. HOME)"></div>
+                        <div class="form-group" style="margin-bottom: 1rem;"><input type="text" class="brutal-input" placeholder="FULL NAME"></div>
+                    </div>
+                    <div class="form-group" style="margin-bottom: 1rem;"><input type="text" class="brutal-input" placeholder="ADDRESS LINE 1"></div>
+                    <div class="form-row">
+                        <div class="form-group"><input type="text" class="brutal-input" placeholder="CITY"></div>
+                        <div class="form-group"><input type="text" class="brutal-input" placeholder="STATE"></div>
+                    </div>
+                    <div class="step-actions" style="margin-top: 1rem; border-top: 2px solid #000; padding-top: 1rem;">
+                        <button class="brutal-btn" style="background: var(--white);" onclick="document.getElementById('add-addr-form').style.display = 'none';">CANCEL</button>
+                        <button class="brutal-btn" style="background: var(--black); color: var(--neon-yellow);" onclick="GlobalState.showToast('ADDRESS SAVED'); document.getElementById('add-addr-form').style.display = 'none';">SAVE ADDRESS</button>
+                    </div>
+                </div>
+
+                <div class="address-grid">
+                    <div class="address-card">
+                        <div style="position: absolute; top: -10px; right: 10px; background: var(--black); color: var(--neon-yellow); padding: 0.25rem 0.5rem; font-family: var(--font-heading); font-size: 0.8rem; border: var(--border-thick);">DEFAULT</div>
+                        <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">HOME</h3>
+                        <p style="margin-bottom: 0.5rem;"><strong>John Doe</strong></p>
+                        <p>123 Brutal St, Apt 4B<br>New York, NY 10001<br>999-999-9999</p>
+                        <div class="address-actions">
+                            <button class="brutal-btn" style="padding: 0.5rem 1rem; background: var(--white);">EDIT</button>
+                            <button class="brutal-btn" style="padding: 0.5rem 1rem; background: var(--white); color: var(--hot-pink);">DELETE</button>
+                        </div>
+                    </div>
+                    <div class="address-card">
+                        <h3 style="margin-bottom: 1rem; font-size: 1.5rem;">OFFICE</h3>
+                        <p style="margin-bottom: 0.5rem;"><strong>John Doe</strong></p>
+                        <p>456 Design Ave, Suite 2<br>Brooklyn, NY 10002<br>999-999-9999</p>
+                        <div class="address-actions">
+                            <button class="brutal-btn" style="padding: 0.5rem 1rem; background: var(--white);">EDIT</button>
+                            <button class="brutal-btn" style="padding: 0.5rem 1rem; background: var(--white); color: var(--hot-pink);">DELETE</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Tab -->
+            <section class="tab-section" id="settings">
+                <h1 style="font-size: 3rem; margin-bottom: 3rem;">ACCOUNT SETTINGS</h1>
+                
+                <div style="max-width: 600px;">
+                    <form onsubmit="event.preventDefault(); GlobalState.showToast('SETTINGS UPDATED', 'success');">
+                        <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem; border-bottom: 2px solid var(--black); padding-bottom: 0.5rem;">PERSONAL INFO</h3>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label class="form-label">FULL NAME</label>
+                            <input type="text" class="brutal-input" value="JOHN DOE">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 2rem;">
+                            <label class="form-label">EMAIL ADDRESS</label>
+                            <input type="email" class="brutal-input" value="john@example.com">
+                        </div>
+
+                        <h3 style="margin-bottom: 1.5rem; font-size: 1.5rem; border-bottom: 2px solid var(--black); padding-bottom: 0.5rem; margin-top: 3rem;">CHANGE PASSWORD</h3>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label class="form-label">CURRENT PASSWORD</label>
+                            <input type="password" class="brutal-input">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label class="form-label">NEW PASSWORD</label>
+                            <input type="password" class="brutal-input">
+                        </div>
+                        
+                        <button type="submit" class="brutal-btn primary" style="font-size: 1.25rem; margin-top: 2rem;">SAVE CHANGES</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="global-footer"></div>
+
+    <script src="products.js"></script>
+    <script src="global.js"></script>
+    <script>
+        // Simple auth state simulation
+        let isLoggedIn = localStorage.getItem('sockd_logged_in') === 'true';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderView();
+
+            // Tabs Logic
+            const navBtns = document.querySelectorAll('.nav-btn');
+            const tabSections = document.querySelectorAll('.tab-section');
+            
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    navBtns.forEach(b => b.classList.remove('active'));
+                    tabSections.forEach(s => s.classList.remove('active'));
+                    
+                    btn.classList.add('active');
+                    document.getElementById(btn.dataset.target).classList.add('active');
+                });
+            });
+        });
+
+        function renderView() {
+            if (isLoggedIn) {
+                document.getElementById('auth-view').style.display = 'none';
+                document.getElementById('profile-view').style.display = 'grid';
+            } else {
+                document.getElementById('auth-view').style.display = 'block';
+                document.getElementById('profile-view').style.display = 'none';
+            }
+        }
+
+        function switchAuth(type) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            
+            if (type === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active');
+                document.getElementById('login-form').classList.add('active');
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active');
+                document.getElementById('signup-form').classList.add('active');
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            isLoggedIn = true;
+            localStorage.setItem('sockd_logged_in', 'true');
+            GlobalState.showToast('YOU HAVE ENTERED THE CULT.', 'success');
+            renderView();
+        }
+
+        function handleLogout() {
+            isLoggedIn = false;
+            localStorage.setItem('sockd_logged_in', 'false');
+            GlobalState.showToast('LOGGED OUT.', 'secondary');
+            renderView();
+        }
+    </script>
+</body>
+</html>

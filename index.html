@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOCKD. | YOUR FEET DESERVE TO GO HARD.</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* index.html specific styles */
+        .hero {
+            display: flex;
+            align-items: center;
+            min-height: 80vh;
+            border-bottom: var(--border-thick);
+            position: relative;
+            background-image: 
+                linear-gradient(var(--black) 2px, transparent 2px),
+                linear-gradient(90deg, var(--black) 2px, transparent 2px);
+            background-size: 50px 50px;
+            background-position: -2px -2px;
+            background-color: var(--light-gray);
+        }
+
+        .hero-content {
+            flex: 1;
+            padding: 4rem;
+            background-color: var(--white);
+            border: var(--border-thick);
+            box-shadow: 12px 12px 0px var(--neon-green);
+            margin: 2rem;
+            max-width: 60%;
+            z-index: 10;
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 6vw, 6rem);
+            margin-bottom: 2rem;
+            text-shadow: 4px 4px 0px var(--neon-yellow);
+            line-height: 0.9;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .hero-image-block {
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40%;
+            aspect-ratio: 1;
+            background-color: var(--neon-yellow);
+            border: var(--border-thick);
+            box-shadow: 16px 16px 0px var(--black);
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-image-block img {
+            width: 120%;
+            height: auto;
+            transform: rotate(-15deg);
+            transition: transform 0.3s ease;
+            mix-blend-mode: multiply;
+        }
+        
+        .hero-image-block:hover img {
+            transform: rotate(0deg) scale(1.1);
+        }
+
+        /* Categories Strip */
+        .categories-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: var(--border-thick);
+        }
+
+        .cat-block {
+            padding: 4rem 2rem;
+            text-align: center;
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 4vw, 3rem);
+            text-transform: uppercase;
+            border-right: var(--border-thick);
+            text-decoration: none;
+            color: var(--black);
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cat-block:last-child {
+            border-right: none;
+        }
+
+        .cat-block:nth-child(1) { background-color: var(--neon-yellow); }
+        .cat-block:nth-child(2) { background-color: var(--cyan); }
+        .cat-block:nth-child(3) { background-color: var(--neon-green); }
+
+        .cat-block:hover {
+            color: var(--white);
+            text-shadow: 2px 2px 0px var(--black);
+        }
+        
+        .cat-block:hover::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--black);
+            z-index: -1;
+            animation: slideUp 0.3s forwards;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        /* Responsive Hero */
+        @media (max-width: 992px) {
+            .hero {
+                flex-direction: column;
+                padding-top: 4rem;
+            }
+            .hero-content {
+                max-width: 90%;
+                margin: 0 auto 2rem;
+            }
+            .hero-image-block {
+                position: relative;
+                width: 80%;
+                transform: none;
+                top: auto;
+                right: auto;
+                margin: 0 auto 4rem;
+            }
+            .categories-strip {
+                grid-template-columns: 1fr;
+            }
+            .cat-block {
+                border-right: none;
+                border-bottom: var(--border-thick);
+            }
+            .cat-block:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="global-header"></div>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>YOUR FEET <br>DESERVE TO <br>GO HARD.</h1>
+            <p style="font-size: 1.25rem; font-weight: 600; max-width: 80%;">
+                Stop wearing boring socks. Upgrade your foundation with premium, aggressive, and undeniably loud foot apparel.
+            </p>
+            <div class="hero-actions">
+                <a href="categories.html" class="brutal-btn primary">SHOP NOW</a>
+                <a href="categories.html" class="brutal-btn" style="background: var(--white);">VIEW LOOKBOOK</a>
+            </div>
+        </div>
+        <div class="hero-image-block">
+            <img src="https://placehold.co/800x800/transparent/000000?text=HERO+SOCK" alt="Hero Sock">
+        </div>
+    </section>
+
+    <div class="marquee-container">
+        <div class="marquee-content">
+            FREE SHIPPING OVER ₹999 • NEW DROP EVERY FRIDAY • SOCKD. • LIMITED EDITIONS • 
+            FREE SHIPPING OVER ₹999 • NEW DROP EVERY FRIDAY • SOCKD. • LIMITED EDITIONS •
+            FREE SHIPPING OVER ₹999 • NEW DROP EVERY FRIDAY • SOCKD. • LIMITED EDITIONS •
+        </div>
+    </div>
+
+    <section class="categories-strip">
+        <a href="categories.html?category=SOCKS" class="cat-block">
+            SOCKS<span style="display:block; font-size: 1rem; margin-top: 1rem; font-family: var(--font-body);">SHOP COLLECTION &rarr;</span>
+        </a>
+        <a href="categories.html?category=LACES" class="cat-block">
+            LACES<span style="display:block; font-size: 1rem; margin-top: 1rem; font-family: var(--font-body);">SHOP COLLECTION &rarr;</span>
+        </a>
+        <a href="categories.html?category=INSOLES" class="cat-block">
+            INSOLES & MORE<span style="display:block; font-size: 1rem; margin-top: 1rem; font-family: var(--font-body);">SHOP COLLECTION &rarr;</span>
+        </a>
+    </section>
+
+    <section class="container" style="padding: 4rem 2rem;">
+        <h2 style="font-size: 3rem; margin-bottom: 2rem; border-bottom: var(--border-thick); padding-bottom: 1rem; display: flex; justify-content: space-between; align-items: flex-end;">
+            FEATURED DROPS
+            <a href="categories.html" style="font-size: 1rem; font-family: var(--font-body); text-decoration: underline;">VIEW ALL</a>
+        </h2>
+        
+        <div class="grid-4" id="featured-products">
+            <!-- Products injected by JS -->
+        </div>
+    </section>
+    
+    <section style="background-color: var(--black); color: var(--neon-yellow); padding: 6rem 2rem; text-align: center; border-bottom: var(--border-thick); border-top: var(--border-thick);">
+        <div class="container" style="max-width: 800px;">
+            <h2 style="font-size: 3.5rem; margin-bottom: 1rem;">JOIN THE CULT.</h2>
+            <p style="color: var(--white); font-size: 1.25rem; margin-bottom: 2rem;">Get 15% off your first brutal order. No spam, just heat.</p>
+            <form style="display: flex; gap: 0; max-width: 500px; margin: 0 auto; box-shadow: var(--shadow-hard); background: var(--white);">
+                <input type="email" placeholder="ENTER YOUR EMAIL" class="brutal-input" style="border: var(--border-thick); border-right: none; box-shadow: none; flex: 1;" required>
+                <button type="submit" class="brutal-btn primary" style="box-shadow: none; border: var(--border-thick);">SIGN UP</button>
+            </form>
+        </div>
+    </section>
+
+    <div id="global-footer"></div>
+
+    <script src="products.js"></script>
+    <script src="global.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('featured-products');
+            
+            // Get first 4 products
+            const featured = products.slice(0, 4);
+            
+            featured.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'brutal-card';
+                card.innerHTML = `
+                    <div class="brutal-card-img" style="background-color: ${product.colors[0]};">
+                        <img src="${product.images[0]}" alt="${product.name}">
+                    </div>
+                    <div class="brutal-card-body">
+                        <span class="brutal-tag">${product.category}</span>
+                        <h3 style="font-size: 1.2rem; margin-bottom: 0.5rem;"><a href="product.html?id=${product.id}">${product.name}</a></h3>
+                        <div class="price-block">
+                            <span class="price ${product.originalPrice > product.price ? 'sale' : ''}">₹${product.price}</span>
+                            ${product.originalPrice > product.price ? `<span class="price-original">₹${product.originalPrice}</span>` : ''}
+                        </div>
+                        <button class="brutal-btn" style="margin-top: 1.5rem; width: 100%; border-width: 2px;" onclick="addToCartEvent(${product.id})">ADD TO CART</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        });
+
+        function addToCartEvent(productId) {
+            const product = products.find(p => p.id === productId);
+            if (product) {
+                GlobalState.addToCart(product);
+            }
+        }
+        
+        // Prevent form submission refresh on newsletter
+        document.querySelector('form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            GlobalState.showToast('WELCOME TO THE CULT. CHECK YOUR EMAIL.', 'success');
+            e.target.reset();
+        });
+    </script>
+</body>
+</html>

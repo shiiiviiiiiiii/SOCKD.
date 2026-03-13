@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOCKD. | PRODUCT</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .breadcrumb {
+            padding: 2rem;
+            font-family: var(--font-body);
+            font-weight: 600;
+            border-bottom: var(--border-thick);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .breadcrumb a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--black);
+            text-decoration: underline;
+        }
+
+        .product-grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 80vh;
+        }
+
+        .product-gallery {
+            border-right: var(--border-thick);
+            background-color: var(--light-gray);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-image-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+        }
+
+        .main-image-container img {
+            width: 100%;
+            max-width: 600px;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+            transition: transform 0.3s;
+        }
+
+        .thumbnails {
+            display: flex;
+            border-top: var(--border-thick);
+            background: var(--white);
+        }
+
+        .thumb {
+            flex: 1;
+            aspect-ratio: 1;
+            border-right: var(--border-thick);
+            cursor: pointer;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--white);
+            transition: background 0.2s;
+        }
+        
+        .thumb:last-child {
+            border-right: none;
+        }
+
+        .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+        }
+
+        .thumb.active, .thumb:hover {
+            background: var(--neon-yellow);
+        }
+
+        .product-info {
+            padding: 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            background: var(--white);
+        }
+
+        .product-title {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            word-break: break-word;
+        }
+
+        .product-price-block {
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        .product-price {
+            font-size: 2.5rem;
+            font-family: var(--font-heading);
+            color: var(--hot-pink);
+            line-height: 1;
+        }
+
+        .old-price {
+            font-size: 1.5rem;
+            text-decoration: line-through;
+            color: #888;
+            font-family: var(--font-heading);
+        }
+
+        .selector-label {
+            font-family: var(--font-heading);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .size-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .size-box {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: var(--border-thick);
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            cursor: pointer;
+            background: var(--white);
+            transition: all 0.1s;
+        }
+
+        .size-box.selected {
+            background: var(--neon-yellow);
+            box-shadow: 4px 4px 0px var(--black);
+            transform: translate(-4px, -4px);
+        }
+
+        .color-selector {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .color-swatch {
+            width: 48px;
+            height: 48px;
+            border: var(--border-thick);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .color-swatch.selected {
+            outline: 3px solid var(--cyan);
+            outline-offset: 4px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .delivery-strip {
+            display: flex;
+            gap: 2rem;
+            padding-top: 2rem;
+            border-top: var(--border-thick);
+            font-weight: 600;
+        }
+
+        .tab-section {
+            border-top: var(--border-thick);
+        }
+
+        .tab-headers {
+            display: flex;
+            border-bottom: var(--border-thick);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 1.5rem;
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            background: var(--white);
+            border: none;
+            border-right: var(--border-thick);
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .tab-btn:last-child {
+            border-right: none;
+        }
+
+        .tab-btn.active {
+            background: var(--black);
+            color: var(--neon-yellow);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 4rem;
+            font-size: 1.2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .horizontal-scroll {
+            display: flex;
+            overflow-x: auto;
+            gap: 2rem;
+            padding: 2rem;
+            scroll-snap-type: x mandatory;
+        }
+
+        .horizontal-scroll .brutal-card {
+            min-width: 300px;
+            scroll-snap-align: start;
+            flex-shrink: 0;
+        }
+        
+        .horizontal-scroll::-webkit-scrollbar {
+            height: 12px;
+        }
+        
+        .horizontal-scroll::-webkit-scrollbar-track {
+            background: var(--light-gray);
+            border-top: var(--border-thick);
+        }
+        
+        .horizontal-scroll::-webkit-scrollbar-thumb {
+            background: var(--neon-green);
+            border: 2px solid var(--black);
+        }
+
+        @media (max-width: 900px) {
+            .product-grid-layout {
+                grid-template-columns: 1fr;
+            }
+            .product-gallery {
+                border-right: none;
+                border-bottom: var(--border-thick);
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            .tab-headers {
+                flex-direction: column;
+            }
+            .tab-btn {
+                border-right: none;
+                border-bottom: var(--border-thick);
+            }
+            .product-info {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="global-header"></div>
+
+    <div class="breadcrumb" id="breadcrumb">
+        <a href="index.html">HOME</a> &gt; <a href="categories.html">SHOP</a> &gt; <span>PRODUCT</span>
+    </div>
+
+    <main class="product-grid-layout" id="product-main-area">
+        <!-- Content injected by JS -->
+    </main>
+
+    <section class="tab-section">
+        <div class="tab-headers">
+            <button class="tab-btn active" data-target="desc">DESCRIPTION</button>
+            <button class="tab-btn" data-target="size">SIZE GUIDE</button>
+            <button class="tab-btn" data-target="reviews">REVIEWS</button>
+        </div>
+        <div class="tab-content active" id="desc">
+            <!-- Injected by JS -->
+        </div>
+        <div class="tab-content" id="size">
+            <h3 style="margin-bottom: 2rem; font-size: 2rem;">SIZE GUIDE</h3>
+            <table style="width: 100%; border-collapse: collapse; border: var(--border-thick);">
+                <tr style="background: var(--neon-yellow); font-family: var(--font-heading);">
+                    <th style="padding: 1rem; border: var(--border-thick); text-align: left;">SIZE</th>
+                    <th style="padding: 1rem; border: var(--border-thick); text-align: left;">US MEN</th>
+                    <th style="padding: 1rem; border: var(--border-thick); text-align: left;">US WOMEN</th>
+                    <th style="padding: 1rem; border: var(--border-thick); text-align: left;">EU</th>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem; border: var(--border-thick);">S/M</td>
+                    <td style="padding: 1rem; border: var(--border-thick);">6 - 8</td>
+                    <td style="padding: 1rem; border: var(--border-thick);">7 - 9.5</td>
+                    <td style="padding: 1rem; border: var(--border-thick);">38 - 41</td>
+                </tr>
+                <tr>
+                    <td style="padding: 1rem; border: var(--border-thick);">L/XL</td>
+                    <td style="padding: 1rem; border: var(--border-thick);">8.5 - 13</td>
+                    <td style="padding: 1rem; border: var(--border-thick);">10 - 14.5</td>
+                    <td style="padding: 1rem; border: var(--border-thick);">42 - 47</td>
+                </tr>
+            </table>
+        </div>
+        <div class="tab-content" id="reviews">
+            <h3 style="margin-bottom: 2rem; font-size: 2rem;">CUSTOMER REVIEWS</h3>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;">
+                <span style="font-size: 4rem; font-family: var(--font-heading); color: var(--neon-green);" id="review-score">4.8</span>
+                <div>
+                    <div style="color: var(--neon-yellow); font-size: 1.5rem;">★★★★★</div>
+                    <p>Based on brutal honesty.</p>
+                </div>
+            </div>
+            <div style="border: var(--border-thick); padding: 2rem; margin-bottom: 1rem;">
+                <h4 style="margin-bottom: 0.5rem;">"LITERALLY HARD"</h4>
+                <div style="color: var(--neon-yellow); margin-bottom: 1rem;">★★★★★</div>
+                <p>These socks saved my marriage. Also very comfy.</p>
+                <p style="margin-top: 1rem; font-weight: bold;">- RICK M.</p>
+            </div>
+        </div>
+    </section>
+
+    <section style="border-top: var(--border-thick);">
+        <h2 style="padding: 4rem 2rem 2rem; font-size: 3rem; text-align: center;">YOU MIGHT ALSO LIKE</h2>
+        <div class="horizontal-scroll" id="cross-sell">
+            <!-- Injected by JS -->
+        </div>
+    </section>
+
+    <div id="global-footer"></div>
+
+    <script src="products.js"></script>
+    <script src="global.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = parseInt(urlParams.get('id'));
+            const product = products.find(p => p.id === productId);
+
+            const mainArea = document.getElementById('product-main-area');
+            const breadcrumb = document.getElementById('breadcrumb');
+            const descArea = document.getElementById('desc');
+            const crossSell = document.getElementById('cross-sell');
+
+            if (!product) {
+                mainArea.innerHTML = `
+                    <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 6rem; text-align: center; background: var(--hot-pink); color: var(--white);">
+                        <h1 style="font-size: 5rem; margin-bottom: 2rem;">404 PRODUCT NOT FOUND</h1>
+                        <a href="categories.html" class="brutal-btn primary">BACK TO SHOP</a>
+                    </div>
+                `;
+                return;
+            }
+
+            // State for variants
+            let selectedSize = product.sizes && product.sizes.length > 0 ? product.sizes[0] : null;
+            let selectedColor = product.colors && product.colors.length > 0 ? product.colors[0] : null;
+            let currentQty = 1;
+
+            breadcrumb.innerHTML = `<a href="index.html">HOME</a> &gt; <a href="categories.html?category=${product.category}">${product.category}</a> &gt; <span>${product.name.toUpperCase()}</span>`;
+            descArea.innerHTML = `<p style="font-size: 1.5rem; line-height: 1.6;">${product.description}</p>`;
+            document.getElementById('review-score').textContent = product.rating || "5.0";
+
+            // Generate Thumbnails
+            const allImages = [...product.images];
+            // If only 1 or 2 images, let's pad it out with placeholders for the gallery effect
+            while (allImages.length < 4) {
+                allImages.push(`https://placehold.co/600x600/black/white?text=VIEW+${allImages.length+1}`);
+            }
+
+            const thumbnailsHtml = allImages.map((img, idx) => `
+                <div class="thumb ${idx === 0 ? 'active' : ''}" onclick="swapImage(this, '${img}')">
+                    <img src="${img}" alt="Thumbnail ${idx}">
+                </div>
+            `).join('');
+
+            const sizeHtml = product.sizes ? product.sizes.map(size => `
+                <div class="size-box ${size === selectedSize ? 'selected' : ''}" onclick="selectSize(this, '${size}')">${size}</div>
+            `).join('') : '<p>One Size Fits All</p>';
+
+            const colorHtml = product.colors ? product.colors.map(color => `
+                <div class="color-swatch ${color === selectedColor ? 'selected' : ''}" style="background-color: ${color};" onclick="selectColor(this, '${color}')"></div>
+            `).join('') : '';
+
+            // Main Layout Render
+            mainArea.innerHTML = `
+                <div class="product-gallery">
+                    <div class="main-image-container" id="main-bg" style="background-color: ${selectedColor || 'var(--light-gray)'}">
+                        <img src="${allImages[0]}" id="main-image" alt="${product.name}">
+                    </div>
+                    <div class="thumbnails">
+                        ${thumbnailsHtml}
+                    </div>
+                </div>
+                <div class="product-info">
+                    <span class="brutal-tag">${product.category}</span>
+                    <h1 class="product-title">${product.name}</h1>
+                    
+                    <div class="product-price-block">
+                        <span class="product-price ${product.originalPrice > product.price ? 'sale' : ''}">₹${product.price}</span>
+                        ${product.originalPrice > product.price ? `<span class="old-price">₹${product.originalPrice}</span>` : ''}
+                    </div>
+                    
+                    <p style="font-size: 1.25rem; margin-bottom: 1rem;">${product.description}</p>
+                    
+                    <div>
+                        <span class="selector-label">SELECT SIZE</span>
+                        <div class="size-grid">${sizeHtml}</div>
+                    </div>
+
+                    ${product.colors ? `
+                    <div>
+                        <span class="selector-label">SELECT COLOR</span>
+                        <div class="color-selector">${colorHtml}</div>
+                    </div>` : ''}
+
+                    <div>
+                        <span class="selector-label">QUANTITY</span>
+                        <div class="qty-stepper">
+                            <button class="qty-btn" onclick="updateLocalQty(-1)">-</button>
+                            <input type="text" class="qty-input" id="qty-display" value="1" readonly>
+                            <button class="qty-btn" onclick="updateLocalQty(1)">+</button>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="brutal-btn primary" style="flex: 2; font-size: 1.5rem;" onclick="addCurrentToCart()">ADD TO CART</button>
+                        <button class="brutal-btn" style="flex: 1;" onclick="addToWishlist()">♡ WISHLIST</button>
+                    </div>
+
+                    <div class="delivery-strip">
+                        <div>🚚 FAST SHIPPING</div>
+                        <div>🔄 30-DAY RETURNS</div>
+                    </div>
+                </div>
+            `;
+
+            // Setup global handlers for selection
+            window.swapImage = function(elem, src) {
+                document.getElementById('main-image').src = src;
+                document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+                elem.classList.add('active');
+            };
+
+            window.selectSize = function(elem, size) {
+                selectedSize = size;
+                document.querySelectorAll('.size-box').forEach(s => s.classList.remove('selected'));
+                elem.classList.add('selected');
+            };
+
+            window.selectColor = function(elem, color) {
+                selectedColor = color;
+                document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+                elem.classList.add('selected');
+                document.getElementById('main-bg').style.backgroundColor = color;
+            };
+
+            window.updateLocalQty = function(delta) {
+                currentQty += delta;
+                if (currentQty < 1) currentQty = 1;
+                document.getElementById('qty-display').value = currentQty;
+            };
+
+            window.addCurrentToCart = function() {
+                GlobalState.addToCart(product, currentQty, selectedSize, selectedColor);
+            };
+
+            window.addToWishlist = function() {
+                GlobalState.showToast('ADDED TO WISHLIST', 'secondary');
+                // Real implementation would save to localStorage
+            };
+
+            // Cross Sell
+            const otherProducts = products.filter(p => p.id !== product.id).slice(0, 5);
+            otherProducts.forEach(op => {
+                const card = document.createElement('div');
+                card.className = 'brutal-card';
+                const bgColor = op.colors && op.colors.length > 0 ? op.colors[0] : 'var(--light-gray)';
+                card.innerHTML = `
+                    <div class="brutal-card-img" style="background-color: ${bgColor};">
+                        <img src="${op.images[0]}" alt="${op.name}">
+                    </div>
+                    <div class="brutal-card-body">
+                        <h3 style="font-size: 1rem; margin-bottom: 0.5rem;"><a href="product.html?id=${op.id}">${op.name}</a></h3>
+                        <span class="price">₹${op.price}</span>
+                    </div>
+                `;
+                crossSell.appendChild(card);
+            });
+
+            // Tabs Logic
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    tabBtns.forEach(b => b.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.getElementById(btn.dataset.target).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

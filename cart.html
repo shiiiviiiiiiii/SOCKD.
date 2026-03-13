@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOCKD. | CART</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .cart-header {
+            padding: 4rem 2rem;
+            background-color: var(--neon-green);
+            border-bottom: var(--border-thick);
+            font-size: clamp(3rem, 6vw, 5rem);
+            text-align: center;
+        }
+
+        .cart-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 4rem;
+            padding: 4rem 2rem;
+            max-width: var(--container-max);
+            margin: 0 auto;
+            min-height: 60vh;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 2rem;
+            padding: 2rem;
+            border: var(--border-thick);
+            margin-bottom: 2rem;
+            background: var(--white);
+            position: relative;
+        }
+
+        .cart-item-img {
+            width: 150px;
+            height: 150px;
+            border: var(--border-thick);
+            background: var(--light-gray);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cart-item-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+        }
+
+        .cart-item-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .cart-item-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-item-meta {
+            color: #666;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: var(--border-thick);
+            transition: all 0.2s;
+        }
+
+        .remove-btn:hover {
+            background: var(--hot-pink);
+            color: var(--white);
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--black);
+        }
+
+        .cart-summary {
+            border: var(--border-thick);
+            padding: 2rem;
+            background: var(--light-gray);
+            height: fit-content;
+            position: sticky;
+            top: 6rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .summary-total {
+            font-size: 2.5rem;
+            font-family: var(--font-heading);
+            color: var(--neon-yellow);
+            text-shadow: 2px 2px 0px var(--black);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: var(--border-thick);
+        }
+
+        .discount-form {
+            display: flex;
+            margin: 2rem 0;
+            gap: 0;
+        }
+        
+        .discount-form .brutal-input {
+            border-right: none;
+        }
+
+        .empty-cart {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 6rem 2rem;
+            background: var(--neon-yellow);
+            border: var(--border-thick);
+        }
+
+        @media (max-width: 1024px) {
+            .cart-layout {
+                grid-template-columns: 1fr;
+            }
+            .cart-summary {
+                position: static;
+            }
+            .cart-item {
+                flex-direction: column;
+            }
+            .cart-item-img {
+                width: 100%;
+                max-width: 250px;
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="global-header"></div>
+
+    <h1 class="cart-header">YOUR CART.</h1>
+
+    <div class="cart-layout" id="cart-container">
+        <!-- Rendered by JS -->
+    </div>
+
+    <div id="global-footer"></div>
+
+    <script src="products.js"></script>
+    <script src="global.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCartPage();
+
+            // Listen for changes from global state
+            window.addEventListener('cartUpdated', renderCartPage);
+        });
+
+        function renderCartPage() {
+            const container = document.getElementById('cart-container');
+            const cartItems = GlobalState.cart;
+
+            if (cartItems.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-cart">
+                        <div style="font-size: 8rem; margin-bottom: 2rem;">🛒</div>
+                        <h2 style="font-size: 3rem; margin-bottom: 1rem;">YOUR CART IS BARE.</h2>
+                        <p style="font-size: 1.5rem; margin-bottom: 3rem;">Let's fix that immediately.</p>
+                        <a href="categories.html" class="brutal-btn primary" style="font-size: 1.5rem;">START SHOPPING</a>
+                    </div>
+                `;
+                return;
+            }
+
+            const itemsHtml = cartItems.map(item => `
+                <div class="cart-item">
+                    <button class="remove-btn" onclick="GlobalState.removeFromCart('${item.cartId}')">✕</button>
+                    <div class="cart-item-img" style="background-color: ${item.color || 'var(--light-gray)'};">
+                        <img src="${item.images[0]}" alt="${item.name}">
+                    </div>
+                    <div class="cart-item-details">
+                        <h3 class="cart-item-title"><a href="product.html?id=${item.id}">${item.name}</a></h3>
+                        <div class="cart-item-meta">
+                            <span>Size: ${item.size}</span>
+                            <span>Color: <div style="display:inline-block; width:16px; height:16px; border:1px solid #000; background-color:${item.color}; vertical-align:middle; margin-left:4px;"></div></span>
+                        </div>
+                        <div class="cart-item-actions">
+                            <div class="qty-stepper">
+                                <button class="qty-btn" onclick="GlobalState.updateItemQuantity('${item.cartId}', ${item.quantity - 1})">-</button>
+                                <input type="text" class="qty-input" value="${item.quantity}" readonly>
+                                <button class="qty-btn" onclick="GlobalState.updateItemQuantity('${item.cartId}', ${item.quantity + 1})">+</button>
+                            </div>
+                            <span class="price">₹${item.price * item.quantity}</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            const subtotal = GlobalState.getCartTotal();
+            const shipping = subtotal > 999 ? 0 : 99;
+            const total = subtotal + shipping;
+
+            container.innerHTML = `
+                <div class="cart-items-container">
+                    ${itemsHtml}
+                    <div style="margin-top: 2rem;">
+                        <a href="categories.html" style="text-decoration: underline; font-size: 1.25rem;">← CONTINUE SHOPPING</a>
+                    </div>
+                </div>
+                <aside class="cart-summary">
+                    <h3 style="font-size: 2rem; margin-bottom: 2rem; border-bottom: 2px solid var(--black); padding-bottom: 1rem;">ORDER SUMMARY</h3>
+                    
+                    <div class="summary-row">
+                        <span>Subtotal</span>
+                        <span style="font-family: var(--font-heading);">₹${subtotal}</span>
+                    </div>
+                    
+                    <div class="summary-row">
+                        <span>Shipping</span>
+                        <span style="font-family: var(--font-heading); color: ${shipping === 0 ? 'var(--neon-green)' : 'var(--black)'};">
+                            ${shipping === 0 ? 'FREE' : '₹' + shipping}
+                        </span>
+                    </div>
+
+                    <div class="discount-form">
+                        <input type="text" placeholder="PROMO CODE" class="brutal-input">
+                        <button class="brutal-btn" style="background: var(--black); color: var(--neon-yellow);">APPLY</button>
+                    </div>
+
+                    <div class="summary-row summary-total">
+                        <span>TOTAL</span>
+                        <span>₹${total}</span>
+                    </div>
+
+                    <a href="checkout.html" class="brutal-btn primary" style="width: 100%; margin-top: 2rem; font-size: 1.5rem; background: var(--neon-green);">PROCEED TO CHECKOUT</a>
+                </aside>
+            `;
+        }
+    </script>
+</body>
+</html>

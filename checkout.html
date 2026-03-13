@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOCKD. | CHECKOUT</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .checkout-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 4rem;
+            padding: 4rem 2rem;
+            max-width: var(--container-max);
+            margin: 0 auto;
+            min-height: 80vh;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3rem;
+            border-bottom: var(--border-thick);
+            padding-bottom: 1rem;
+            position: relative;
+        }
+
+        .step {
+            font-family: var(--font-heading);
+            font-size: 1.5rem;
+            color: #ccc;
+            position: relative;
+            background: var(--white);
+            padding: 0 1rem;
+            z-index: 2;
+        }
+
+        .step.active {
+            color: var(--black);
+            text-shadow: 2px 2px 0px var(--neon-yellow);
+        }
+
+        .step.completed {
+            color: var(--neon-green);
+        }
+
+        .step-container {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .step-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-family: var(--font-heading);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .radio-option {
+            border: var(--border-thick);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+            font-family: var(--font-heading);
+        }
+
+        .radio-option:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px var(--black);
+        }
+
+        .radio-option input[type="radio"] {
+            width: 24px;
+            height: 24px;
+            accent-color: var(--neon-yellow);
+        }
+
+        .radio-option.selected {
+            background: var(--neon-yellow);
+            border-color: var(--black);
+        }
+        
+        .radio-option.selected.green { background: var(--neon-green); }
+        .radio-option.selected.pink { background: var(--hot-pink); color: var(--white); }
+        .radio-option.selected.cyan { background: var(--cyan); }
+
+        .payment-details {
+            display: none;
+            padding: 2rem;
+            border: var(--border-thick);
+            border-top: none;
+            background: var(--light-gray);
+            margin-top: -1rem;
+            margin-bottom: 2rem;
+        }
+
+        .payment-details.active {
+            display: block;
+        }
+
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: var(--white);
+            border: var(--border-thick);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-heading);
+            background-image: repeating-linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc), repeating-linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%, #ccc);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+        }
+
+        .step-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            border-top: var(--border-thick);
+            padding-top: 2rem;
+        }
+
+        .cart-summary {
+            border: var(--border-thick);
+            padding: 2rem;
+            background: var(--light-gray);
+            height: fit-content;
+            position: sticky;
+            top: 6rem;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .summary-item img {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--black);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .summary-total {
+            font-size: 2.5rem;
+            font-family: var(--font-heading);
+            color: var(--neon-yellow);
+            text-shadow: 2px 2px 0px var(--black);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: var(--border-thick);
+        }
+
+        .success-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--neon-green);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .success-overlay.active {
+            display: flex;
+        }
+
+        .success-overlay h1 {
+            font-size: clamp(4rem, 8vw, 8rem);
+            margin-bottom: 2rem;
+            color: var(--black);
+            text-shadow: 4px 4px 0px var(--white);
+            line-height: 0.9;
+        }
+
+        @media (max-width: 900px) {
+            .checkout-layout {
+                grid-template-columns: 1fr;
+            }
+            .cart-summary {
+                position: static;
+                order: -1;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .step {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="global-header"></div>
+
+    <div class="checkout-layout">
+        <div class="checkout-flow">
+            <div class="step-indicator">
+                <div class="step active" id="step-ind-1">1. DETAILS</div>
+                <div class="step" id="step-ind-2">2. SHIPPING</div>
+                <div class="step" id="step-ind-3">3. PAYMENT</div>
+            </div>
+
+            <!-- STEP 1: DETAILS -->
+            <div class="step-container active" id="step-1">
+                <h2 style="margin-bottom: 2rem; font-size: 2.5rem;">CONTACT DETAILS</h2>
+                <div class="form-group">
+                    <label class="form-label">FULL NAME</label>
+                    <input type="text" class="brutal-input" placeholder="JOHN DOE" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">EMAIL ADDRESS</label>
+                        <input type="email" class="brutal-input" placeholder="JOHN@EXAMPLE.COM" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">PHONE NUMBER</label>
+                        <input type="tel" class="brutal-input" placeholder="999-999-9999" required>
+                    </div>
+                </div>
+                
+                <div class="step-actions">
+                    <a href="cart.html" class="brutal-btn" style="background: var(--white);">BACK TO CART</a>
+                    <button class="brutal-btn primary" onclick="nextStep(2)">NEXT: SHIPPING</button>
+                </div>
+            </div>
+
+            <!-- STEP 2: SHIPPING -->
+            <div class="step-container" id="step-2">
+                <h2 style="margin-bottom: 2rem; font-size: 2.5rem;">SHIPPING ADDRESS</h2>
+                <div class="form-group">
+                    <label class="form-label">ADDRESS LINE 1</label>
+                    <input type="text" class="brutal-input" placeholder="123 BRUTAL ST">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">ADDRESS LINE 2 (OPTIONAL)</label>
+                    <input type="text" class="brutal-input" placeholder="APT 4B">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">CITY</label>
+                        <input type="text" class="brutal-input" placeholder="NEW YORK">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">STATE</label>
+                        <input type="text" class="brutal-input" placeholder="NY">
+                    </div>
+                </div>
+                <div class="form-group" style="width: 50%;">
+                    <label class="form-label">PIN / ZIP CODE</label>
+                    <input type="text" class="brutal-input" placeholder="10001">
+                </div>
+
+                <h3 style="margin: 2rem 0 1rem; font-size: 1.5rem;">SHIPPING METHOD</h3>
+                <label class="radio-option selected pink" onclick="selectRadio(this, 'shipping')">
+                    <input type="radio" name="shipping" checked>
+                    <div style="flex-grow: 1;">
+                        <strong>STANDARD DELIVER</strong>
+                        <div style="font-family: var(--font-body); font-size: 0.9rem;">3-5 Business Days</div>
+                    </div>
+                    <strong>FREE</strong>
+                </label>
+                <label class="radio-option" onclick="selectRadio(this, 'shipping')">
+                    <input type="radio" name="shipping">
+                    <div style="flex-grow: 1;">
+                        <strong>EXPRESS DROPOFF</strong>
+                        <div style="font-family: var(--font-body); font-size: 0.9rem;">Next Business Day</div>
+                    </div>
+                    <strong>₹250</strong>
+                </label>
+
+                <div class="step-actions">
+                    <button class="brutal-btn" onclick="nextStep(1)">BACK</button>
+                    <button class="brutal-btn primary" onclick="nextStep(3)">NEXT: PAYMENT</button>
+                </div>
+            </div>
+
+            <!-- STEP 3: PAYMENT -->
+            <div class="step-container" id="step-3">
+                <h2 style="margin-bottom: 2rem; font-size: 2.5rem;">PAYMENT</h2>
+                
+                <label class="radio-option selected cyan" onclick="selectPayment(this, 'upi')">
+                    <input type="radio" name="payment" checked>
+                    <strong>UPI / SCANNABLE QR</strong>
+                </label>
+                <div class="payment-details active" id="pay-upi">
+                    <div class="qr-placeholder">
+                        <span style="background: var(--white); padding: 0.5rem; border: 2px solid #000;">SCAN TO PAY</span>
+                    </div>
+                    <p style="text-align: center; margin-top: 1rem; font-weight: bold;">sockd@upi</p>
+                </div>
+
+                <label class="radio-option" onclick="selectPayment(this, 'card')">
+                    <input type="radio" name="payment">
+                    <strong>CREDIT / DEBIT CARD</strong>
+                </label>
+                <div class="payment-details" id="pay-card">
+                    <div class="form-group">
+                        <label class="form-label">CARD NUMBER</label>
+                        <input type="text" class="brutal-input" placeholder="0000 0000 0000 0000">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">EXPIRY</label>
+                            <input type="text" class="brutal-input" placeholder="MM/YY">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">CVV</label>
+                            <input type="text" class="brutal-input" placeholder="123">
+                        </div>
+                    </div>
+                </div>
+
+                <label class="radio-option" onclick="selectPayment(this, 'cod')">
+                    <input type="radio" name="payment">
+                    <strong>CASH ON DELIVERY</strong>
+                </label>
+                <div class="payment-details" id="pay-cod">
+                    <p style="font-weight: 600; font-size: 1.25rem;">Pay in cash when your brutal gear arrives. No extra fees.</p>
+                </div>
+
+                <div class="step-actions">
+                    <button class="brutal-btn" onclick="nextStep(2)">BACK</button>
+                    <button class="brutal-btn" style="background: var(--neon-green); font-size: 1.5rem;" onclick="placeOrder()">PLACE ORDER</button>
+                </div>
+            </div>
+        </div>
+
+        <aside class="cart-summary">
+            <h3 style="font-size: 2rem; margin-bottom: 1rem; border-bottom: 2px solid var(--black); padding-bottom: 1rem;">ORDER SUMMARY</h3>
+            <div id="checkout-items" style="border-bottom: 2px solid var(--black); padding-bottom: 1rem; margin-bottom: 1rem; max-height: 300px; overflow-y: auto;">
+                <!-- Filled by JS -->
+            </div>
+            
+            <div class="summary-row">
+                <span>Subtotal</span>
+                <span id="chk-subtotal">₹0</span>
+            </div>
+            <div class="summary-row">
+                <span>Shipping</span>
+                <span id="chk-shipping">₹0</span>
+            </div>
+            <div class="summary-row summary-total">
+                <span>TOTAL</span>
+                <span id="chk-total">₹0</span>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="success-overlay" id="success-overlay">
+        <h1>ORDER PLACED.</h1>
+        <h2 style="font-size: 2.5rem; margin-bottom: 1rem;">YOU'RE GOING TO LOOK HARD. 🧦</h2>
+        <p style="font-size: 1.5rem; margin-bottom: 3rem;">Order ID: #<span id="order-id"></span></p>
+        <div style="display: flex; gap: 1rem;">
+            <a href="profile.html" class="brutal-btn" style="background: var(--white); font-size: 1.5rem;">VIEW ORDER</a>
+            <a href="index.html" class="brutal-btn secondary" style="font-size: 1.5rem;">BACK HOME</a>
+        </div>
+    </div>
+
+    <div id="global-footer"></div>
+
+    <script src="products.js"></script>
+    <script src="global.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (GlobalState.cart.length === 0) {
+                // Redirect if cart is empty
+                window.location.href = 'cart.html';
+                return;
+            }
+            
+            renderSummary();
+        });
+
+        function renderSummary() {
+            const container = document.getElementById('checkout-items');
+            let html = '';
+            
+            GlobalState.cart.forEach(item => {
+                html += `
+                    <div class="summary-item">
+                        <img src="${item.images[0]}" alt="${item.name}" style="background-color: ${item.color || '#fff'};">
+                        <div style="flex-grow: 1;">
+                            <div style="font-weight: 600;">${item.name}</div>
+                            <div style="color: #666; font-size: 0.8rem;">Qty: ${item.quantity} | Size: ${item.size}</div>
+                        </div>
+                        <div style="font-weight: bold;">₹${item.price * item.quantity}</div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+
+            const subtotal = GlobalState.getCartTotal();
+            const shipping = subtotal > 999 ? 0 : 99; // Standard shipping
+            const total = subtotal + shipping;
+
+            document.getElementById('chk-subtotal').textContent = `₹${subtotal}`;
+            document.getElementById('chk-shipping').textContent = shipping === 0 ? 'FREE' : `₹${shipping}`;
+            document.getElementById('chk-total').textContent = `₹${total}`;
+        }
+
+        function nextStep(step) {
+            // Hide all steps
+            document.querySelectorAll('.step-container').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step-${step}`).classList.add('active');
+
+            // Update indicators
+            document.querySelectorAll('.step').forEach((el, index) => {
+                el.classList.remove('active', 'completed');
+                if (index + 1 < step) {
+                    el.classList.add('completed');
+                } else if (index + 1 === step) {
+                    el.classList.add('active');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectRadio(elem, groupName) {
+            document.querySelectorAll(`input[name="${groupName}"]`).forEach(input => {
+                input.closest('.radio-option').classList.remove('selected', 'green', 'pink', 'cyan');
+            });
+            elem.classList.add('selected');
+            if (groupName === 'shipping') elem.classList.add('pink');
+            elem.querySelector('input').checked = true;
+        }
+
+        function selectPayment(elem, type) {
+            document.querySelectorAll(`input[name="payment"]`).forEach(input => {
+                input.closest('.radio-option').classList.remove('selected', 'cyan');
+            });
+            elem.classList.add('selected', 'cyan');
+            elem.querySelector('input').checked = true;
+
+            document.querySelectorAll('.payment-details').forEach(el => el.classList.remove('active'));
+            document.getElementById(`pay-${type}`).classList.add('active');
+        }
+
+        function placeOrder() {
+            // Generate random order ID
+            const orderId = 'SKD' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('order-id').textContent = orderId;
+            
+            // Show overlay
+            const overlay = document.getElementById('success-overlay');
+            overlay.classList.add('active');
+            
+            // Clear cart
+            GlobalState.cart = [];
+            GlobalState.saveCart();
+
+            // Simple Confetti effect (simulated with DOM elements)
+            for(let i=0; i<50; i++) {
+                createConfetti();
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['var(--neon-yellow)', 'var(--hot-pink)', 'var(--white)', 'var(--cyan)'];
+            const conf = document.createElement('div');
+            conf.style.position = 'absolute';
+            conf.style.width = '20px';
+            conf.style.height = '20px';
+            conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            conf.style.border = '2px solid black';
+            conf.style.left = Math.random() * 100 + 'vw';
+            conf.style.top = '-20px';
+            conf.style.zIndex = '1001';
+            
+            document.getElementById('success-overlay').appendChild(conf);
+
+            // Animate
+            const duration = Math.random() * 3000 + 2000;
+            const endY = window.innerHeight + 50;
+            const rotation = Math.random() * 720;
+            
+            conf.animate([
+                { transform: `translate3d(0, 0, 0) rotate(0deg)` },
+                { transform: `translate3d(${Math.random()*200 - 100}px, ${endY}px, 0) rotate(${rotation}deg)` }
+            ], {
+                duration: duration,
+                easing: 'cubic-bezier(.37,0,.63,1)',
+                fill: 'forwards'
+            });
+        }
+    </script>
+</body>
+</html>
